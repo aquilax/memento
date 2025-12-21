@@ -37,6 +37,87 @@
 #
 # Output must match the ty.Message struct
 #
-# Usage:
-# python3 scripts/skype/import-messages.py data/import/skype/contacts/messages.json messages.json > data/import/skype/messages.json
+# Usage: python3 scripts/skype/import-messages.py contacts.json messages.json > skype-messages.json
+
+import json
+import sys
+import datetime
+import re
+
+def strip_html(text):
+    # Simple HTML tag remover
+    return re.sub(r'<[^>]+>', '', text)
+
+def main():
+    if len(sys.argv) != 3:
+        print("Usage: python3 scripts/skype/import-messages.py contacts.json messages.json", file=sys.stderr)
+        sys.exit(1)
+
+    contacts_file = sys.argv[1]
+    messages_file = sys.argv[2]
+
+    with open(contacts_file, 'r', encoding='utf-8') as f:
+        contacts = json.load(f)
+
+    user_map = {}
+    for user in contacts:
+        for pid in user['platform_ids']:
+            if pid['platform'] == 'skype':
+                user_map[pid['id']] = user
+                break  # assume one skype id per user
+
+    with open(messages_file, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+
+    user_id = data['userId']
+    messages = []
+
+    for conv in data['conversations']:
+        conv_id = conv['id']
+        for msg in conv['MessageList']:
+            ts_str = msg['originalarrivaltime']
+            ts = datetime.datetime.fromisoformat(ts_str.replace('Z', '+00:00'))
+            from_id = msg['from']
+
+            # Assume user conversation for now
+            if from_id == conv_id:
+                to_user_id = user_id
+            else:
+                to_user_id = conv_id
+
+            to = {"type": "user", "user_id": to_user_id}
+            content = msg.get('content', '')
+            raw = content
+            text = strip_html(content)
+            attachments = []
+            meta = {}
+            if msg.get('properties'):
+                for k, v in msg['properties'].items():
+                    if v is not None:
+                        meta[str(k)] = str(v)
+
+            # Extract additional data
+            links = re.findall(r'https?://[^\s]+', content)
+            mentions = re.findall(r'@(\w+)', content)
+            if links:
+                meta['links'] = links
+            if mentions:
+                meta['mentions'] = mentions
+
+            message = {
+                "platform": "skype",
+                "ts": ts.isoformat() + 'Z',
+                "from": from_id,
+                "to": to,
+                "text": text,
+                "raw": raw,
+                "attachments": attachments,
+                "meta": meta
+            }
+            messages.append(message)
+
+    print(json.dumps(messages, indent=2))
+
+if __name__ == "__main__":
+    main()
 
