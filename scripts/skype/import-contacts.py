@@ -22,10 +22,19 @@ def download_avatar(avatar_url, user_id, avatar_dir):
         response.raise_for_status()
         # Sanitize filename: replace invalid characters with underscores
         safe_filename = re.sub(r'[<>:"/\\|?*]', '_', user_id)
-        filepath = os.path.join(avatar_dir, safe_filename)
+        # Get file extension from MIME type
+        content_type = response.headers.get('content-type', '').split(';')[0]
+        ext_map = {
+            'image/jpeg': '.jpg',
+            'image/png': '.png',
+            'image/gif': '.gif',
+            'image/webp': '.webp',
+        }
+        ext = ext_map.get(content_type, '')
+        filepath = os.path.join(avatar_dir, safe_filename + ext)
         with open(filepath, 'wb') as f:
             f.write(response.content)
-        return safe_filename
+        return safe_filename + ext
     except Exception as e:
         print(f"Failed to download avatar for {user_id}: {e}", file=sys.stderr)
         return None
