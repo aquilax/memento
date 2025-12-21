@@ -6,6 +6,7 @@ type Platform string
 type MessageTargetType string
 type UserID string
 type GroupID string
+type Meta map[string]string
 
 const (
 	PlatformSkype Platform = "skype"
@@ -18,10 +19,10 @@ const (
 )
 
 type PlatformID struct {
-	ID             string            `json:"id"`
-	Platform       Platform          `json:"platform"`
-	AvatarFileName string            `json:"avatar"`
-	Meta           map[string]string `json:"meta"`
+	ID             string   `json:"id"`
+	Platform       Platform `json:"platform"`
+	AvatarFileName string   `json:"avatar"`
+	Meta           Meta     `json:"meta"`
 }
 
 type User struct {
@@ -48,4 +49,5 @@ type Message struct {
 	Text        string        `json:"text,"`
 	Raw         any           `json:"raw,"`
 	Attachments []Attachment  `json:"attachments"`
+	Meta        Meta          `json:"meta"`
 }
