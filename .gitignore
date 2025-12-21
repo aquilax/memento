@@ -32,5 +32,5 @@ go.work.sum
 # .vscode/
 
 # Data files
-./imports
-./Data
+imports/*
+data/*
