@@ -9,10 +9,11 @@ type GroupID string
 type Meta map[string]string
 
 const (
-	PlatformSkype Platform = "skype"
-	PlatformICQ   Platform = "icq"
-	PlatformIRC   Platform = "irc"
-	PlatformSMS   Platform = "sms"
+	PlatformSkype  Platform = "skype"
+	PlatformICQ    Platform = "icq"
+	PlatformIRC    Platform = "irc"
+	PlatformSMS    Platform = "sms"
+	PlatformJabber Platform = "jabber"
 
 	MessageTargetTypeGroup MessageTargetType = "group"
 	MessageTargetTypeUser  MessageTargetType = "user"
@@ -25,7 +26,7 @@ type PlatformID struct {
 	Meta           Meta     `json:"meta"`
 }
 
-type User struct {
+type Contact struct {
 	Name        string       `json:"name"`
 	PlatformIDs []PlatformID `json:"platform_ids"`
 }

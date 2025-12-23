@@ -75,21 +75,28 @@ def main():
             uin_dict[owner] = uin_val
 
         messages = []
-        for row in cur.execute("SELECT owner, timestamp, type, data FROM events"):
-            owner, ts, typ, data = row
+        for row in cur.execute("SELECT owner, direction, timestamp, type, data FROM events"):
+            owner, direction, ts, typ, data = row
             typ = typ.decode('utf-8') if isinstance(typ, bytes) else typ
+            direction = direction.decode('utf-8') if isinstance(direction, bytes) else direction
             if typ == 'Message':
                 data = data.decode('utf-8') if isinstance(data, bytes) else data
                 # Parse timestamp string to datetime
                 dt = datetime.strptime(ts, '%Y-%m-%d %H:%M:%S')
                 # Get UIN of owner
                 uin = uin_dict.get(owner)
+                if direction == '>':
+                    m_from = uin;
+                    m_to = {"type": "user", "user_id": user_uin},
+                else:
+                    m_from = user_uin;
+                    m_to = {"type": "user", "user_id": uin},
                 if uin:
                     message = {
                         "platform": "icq",
                         "ts": dt.isoformat(),
-                        "from": uin,
-                        "to": {"type": "user", "user_id": user_uin},
+                        "from": m_from,
+                        "to": m_to,
                         "text": data,
                         "raw": None,
                         "attachments": [],
