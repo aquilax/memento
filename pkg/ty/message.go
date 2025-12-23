@@ -16,6 +16,7 @@ const (
 	PlatformJabber Platform = "jabber"
 	PlatformMSN    Platform = "msn"
 	PlatformYahoo  Platform = "yahoo"
+	PlatformGoogle Platform = "google"
 
 	MessageTargetTypeGroup MessageTargetType = "group"
 	MessageTargetTypeUser  MessageTargetType = "user"
