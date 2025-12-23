@@ -116,7 +116,7 @@ def main():
             }
             messages.append(message)
 
-    print(json.dumps(messages, indent=2))
+    print(json.dumps(messages, indent=2, ensure_ascii=False))
 
 if __name__ == "__main__":
     main()
