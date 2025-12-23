@@ -41,8 +41,15 @@
 
 import json
 import sys
-import datetime
+from datetime import timezone, datetime
 import re
+from collections import OrderedDict
+
+
+def format_utc_seconds(dt):
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
 
 def strip_html(text):
     # Simple HTML tag remover
@@ -70,13 +77,12 @@ def main():
         data = json.load(f)
 
     user_id = data['userId']
-    messages = []
 
     for conv in data['conversations']:
         conv_id = conv['id']
         for msg in conv['MessageList']:
             ts_str = msg['originalarrivaltime']
-            ts = datetime.datetime.fromisoformat(ts_str.replace('Z', '+00:00'))
+            ts = datetime.fromisoformat(ts_str.replace('Z', '+00:00'))
             from_id = msg['from']
 
             # Assume user conversation for now
@@ -89,7 +95,6 @@ def main():
             content = msg.get('content', '')
             raw = content
             text = strip_html(content)
-            attachments = []
             meta = {}
             if msg.get('properties'):
                 for k, v in msg['properties'].items():
@@ -104,20 +109,16 @@ def main():
             if mentions:
                 meta['mentions'] = mentions
 
-            message = {
+            message = OrderedDict({
+                "ts": format_utc_seconds(ts),
                 "platform": "skype",
-                "ts": ts.isoformat() + 'Z',
                 "from": from_id,
                 "to": to,
                 "text": text,
                 "raw": raw,
-                "attachments": attachments,
                 "meta": meta
-            }
-            messages.append(message)
-
-    print(json.dumps(messages, indent=2, ensure_ascii=False))
+            })
+            print(json.dumps(message, ensure_ascii=False))
 
 if __name__ == "__main__":
     main()
-

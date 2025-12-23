@@ -14,6 +14,8 @@ const (
 	PlatformIRC    Platform = "irc"
 	PlatformSMS    Platform = "sms"
 	PlatformJabber Platform = "jabber"
+	PlatformMSN    Platform = "msn"
+	PlatformYahoo  Platform = "yahoo"
 
 	MessageTargetTypeGroup MessageTargetType = "group"
 	MessageTargetTypeUser  MessageTargetType = "user"

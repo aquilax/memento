@@ -6,69 +6,94 @@
 # python3 scripts/miranda/import-miranda-sqlite3-dump.py messages -d export.sqlite3 -u <user_uin> > messages.json
 
 import argparse
-from datetime import datetime
+from datetime import timezone
 import json
 from vendor.mirandat3.mirandat3 import DBHeader, DBContact, Encoder
+from collections import OrderedDict
+
+def format_utc_seconds(dt):
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
 
 def get_platform(p):
-    if p == 'JABBER':
+    if p == 'JABBER' or p == 'jabber':
         return 'jabber'
-    return p
+    elif p == 'ICQ' or p == 'icq':
+        return 'icq'
+    elif p == 'IRC' or p == 'irc':
+        return 'irc'
+    else:
+        raise Exception(f"Unknown platform: {p}")
 
-def get_contact(c: DBContact):
+
+def get_id(settings):
+    platform = get_platform(settings["p"])
+    if platform == 'icq':
+        return settings.setdefault("UIN", "UNKNOWN")
+    if platform == 'irc':
+        return settings.setdefault("Nick", "UNKNOWN")
+    if platform == 'jabber':
+        return settings.setdefault("Nick", "UNKNOWN")
+    else:
+        raise Exception(f"Unknown platform: {platform}")
+
+
+def get_contact(c: DBContact, on_contact):
     name = str(c.name)
     settings = {}
     for k, v in list(c.settings.items()):
         v = v.decode('utf-8') if isinstance(v, bytes) else str(v)
         settings[k] = v
-    return {
+    on_contact({
         "name": name,
         "platform_ids": [{
-            "id": settings.setdefault("UIN", "UNKNOWN"),
+            "id": get_id(settings),
             "platform": get_platform(settings["p"]),
             "avatar": "",
             "meta": settings
         }]
-    }
+    })
 
-def get_messages(c: DBContact, owner_name):
+def get_messages(c: DBContact, owner_id, on_message):
     platform = get_platform(c.settings.get("p"))
-    contact_name = str(c.name)
+    user_id = get_id(c.settings)
     messages = []
     for e in c.events:
         if e.dir() == '>':
-            m_from = contact_name
-            m_to = {"type": "user", "user_id": owner_name}
+            m_from = user_id
+            m_to = {"type": "user", "user_id": owner_id}
         else:
-            m_from = owner_name
-            m_to = {"type": "user", "user_id": contact_name}
-        messages.append({
+            m_from = owner_id
+            m_to = {"type": "user", "user_id": user_id}
+        on_message(OrderedDict({
+            "ts": format_utc_seconds(e.timestamp),
             "platform": get_platform(platform),
-            "ts": e.timestamp.isoformat(),
             "from": m_from,
             "to": m_to,
             "text": e.parse_blob(),
-            "raw": None,
-            "attachments": [],
             "meta": {
                 "type": e.typestr()
             }
-        })
+        }))
 
     return messages
 
+
+def cb_on_message(message):
+    print(json.dumps(message, ensure_ascii=False))
 
 def main():
     parser = argparse.ArgumentParser(description="Import contacts and messages from Miranda SQLite dump")
     parser.add_argument("mode", choices=["contacts", "messages"], help="Mode: contacts or messages")
     parser.add_argument("-f", "--file", required=True, help="MirandaIM dat file")
-    parser.add_argument("-u", "--user", help="Name of the use (for message mode)")
+    parser.add_argument("-u", "--user", help="UserID of the owner (for message mode)")
     parser.add_argument("-e", "--encoding", help="Encoding code page", default=Encoder.encoding)
 
     args = parser.parse_args()
-    owner_name = "unknown"
+    owner_id = "unknown"
     if args.user:
-        owner_name = args.user
+        owner_id = args.user
 
     Encoder.encoding = args.encoding
 
@@ -82,29 +107,14 @@ def main():
     messages = []
     while next_contact != 0:
         c = DBContact(dat, next_contact)
-        contacts.append(get_contact(c))
+        if args.mode == "contacts":
+          get_contact(c, contacts.append)
         if args.mode == "messages":
-            messages += get_messages(c, owner_name)
+            messages += get_messages(c, owner_id, cb_on_message)
         next_contact = c.next
 
     if args.mode == "contacts":
         print(json.dumps(contacts, indent=2, ensure_ascii=False))
-    if args.mode == "messages":
-        print(json.dumps(messages, indent=2, ensure_ascii=False))
-
-        # cur.execute("insert into contacts(name) values (?)", (str(c.name).encode('utf-8'),))
-        # c_id = None
-        # for row in cur.execute('select last_insert_rowid()'):
-        #     print(row)
-        #     c_id = row[0]
-        # cur.executemany("insert into settings(owner, name, value) values (?, ?, ?)",
-        #                 [(c_id, k.encode('utf-8'), str(v).encode('utf-8')) for k, v in list(c.settings.items())])
-        # cur.executemany("insert into events(owner, direction, timestamp, type, data) values (?, ?, ?, ?, ?)",
-        #                 [(c_id, e.dir() ,e.timestamp, e.typestr().encode('utf-8'), e.parse_blob().encode('utf-8')) for e in c.events])
-        # next_contact = c.next
-
-
-
 
 if __name__ == "__main__":
     main()
