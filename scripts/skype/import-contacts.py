@@ -72,7 +72,7 @@ def main():
                     meta[key] = value.strip()
 
             platform_id = {
-                "id": skype_handle,
+                "id": str(skype_handle),
                 "platform": "skype",
                 "avatar": avatar_filename,
                 "meta": meta

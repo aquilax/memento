@@ -6,7 +6,7 @@ type Platform string
 type MessageTargetType string
 type UserID string
 type GroupID string
-type Meta map[string]string
+type Meta map[string]any
 
 const (
 	PlatformSkype  Platform = "skype"

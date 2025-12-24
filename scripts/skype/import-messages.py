@@ -83,7 +83,7 @@ def main():
         for msg in conv['MessageList']:
             ts_str = msg['originalarrivaltime']
             ts = datetime.fromisoformat(ts_str.replace('Z', '+00:00'))
-            from_id = msg['from']
+            from_id = str(msg['from'])
 
             # Assume user conversation for now
             if from_id == conv_id:
@@ -91,7 +91,7 @@ def main():
             else:
                 to_user_id = conv_id
 
-            to = {"type": "user", "user_id": to_user_id}
+            to = {"type": "user", "user_id": str(to_user_id)}
             content = msg.get('content', '')
             raw = content
             text = strip_html(content)

@@ -63,7 +63,7 @@ def collect_contacts(directory):
                     email = member['email']
                     if email not in contacts:
                         platform_id = {
-                            "id": email,
+                            "id": str(email),
                             "platform": PLATFORM,
                             "avatar": "",
                             "meta": {}
@@ -89,20 +89,20 @@ def collect_messages(directory, on_message):
                         other = [m for m in members if m['email'] != creator['email']][0]
                         to = {
                             "type": "user",
-                            "user_id": other['email']
+                            "user_id": str(other['email'])
                         }
                     else:
                         # Group
                         to = {
                             "type": "group",
-                            "group_id": msg['topic_id']
+                            "group_id": str(msg['topic_id'])
                         }
                     # if not 'text' in msg:
                     #     raise Exception(msg)
                     message = {
                         "ts": parse_date(msg['created_date']),
                         "platform": PLATFORM,
-                        "from": creator['email'],
+                        "from": str(creator['email']),
                         "to": to,
                         "text": msg.get('text', ''),
                         "meta": {

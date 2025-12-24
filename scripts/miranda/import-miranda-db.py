@@ -48,7 +48,7 @@ def get_contact(c: DBContact, on_contact):
     on_contact({
         "name": name,
         "platform_ids": [{
-            "id": get_id(settings),
+            "id": str(get_id(settings)),
             "platform": get_platform(settings["p"]),
             "avatar": "",
             "meta": settings
@@ -61,11 +61,11 @@ def get_messages(c: DBContact, owner_id, on_message):
     messages = []
     for e in c.events:
         if e.dir() == '>':
-            m_from = user_id
-            m_to = {"type": "user", "user_id": owner_id}
+            m_from = str(user_id)
+            m_to = {"type": "user", "user_id": str(owner_id)}
         else:
-            m_from = owner_id
-            m_to = {"type": "user", "user_id": user_id}
+            m_from = str(owner_id)
+            m_to = {"type": "user", "user_id": str(user_id)}
         on_message(OrderedDict({
             "ts": format_utc_seconds(e.timestamp),
             "platform": get_platform(platform),

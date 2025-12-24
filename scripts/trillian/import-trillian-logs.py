@@ -100,7 +100,7 @@ def collect_contacts(directory, encoding='utf-8'):
                                 contacts[contact_key] = OrderedDict({
                                     "name": contact_name,
                                     "platform_ids": [{
-                                        "id": contact_id,
+                                        "id": str(contact_id),
                                         "platform": platform,
                                         "avatar": "",
                                         "meta": {}
@@ -187,10 +187,10 @@ def collect_messages(directory, on_message, encoding='utf-8'):
                                 message = OrderedDict({
                                     "ts": msg_time.isoformat() + "Z",
                                     "platform": platform,
-                                    "from": from_id,
+                                    "from": str(from_id),
                                     "to": {
                                         "type": "user",
-                                        "user_id": to_id
+                                        "user_id": str(to_id)
                                     },
                                     "text": text,
                                 })
