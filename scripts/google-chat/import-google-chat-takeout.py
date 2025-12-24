@@ -55,9 +55,9 @@ def parse_date(date_str):
 
 def collect_contacts(directory):
     contacts = {}
-    for root, dirs, files in os.walk(directory):
+    for root, _dirs, files in os.walk(directory):
         if 'group_info.json' in files:
-            with open(os.path.join(root, 'group_info.json'), 'r') as f:
+            with open(os.path.join(root, 'group_info.json'), 'r', encoding='utf-8') as f:
                 data = json.load(f)
                 for member in data.get('members', []):
                     email = member['email']
@@ -75,12 +75,12 @@ def collect_contacts(directory):
     return list(contacts.values())
 
 def collect_messages(directory, on_message):
-    for root, dirs, files in os.walk(directory):
+    for root, _dirs, files in os.walk(directory):
         if 'messages.json' in files and 'group_info.json' in files:
-            with open(os.path.join(root, 'group_info.json'), 'r') as f:
+            with open(os.path.join(root, 'group_info.json'), 'r', encoding='utf-8') as f:
                 group_data = json.load(f)
             members = group_data.get('members', [])
-            with open(os.path.join(root, 'messages.json'), 'r') as f:
+            with open(os.path.join(root, 'messages.json'), 'r', encoding='utf-8') as f:
                 data = json.load(f)
                 for msg in data.get('messages', []):
                     creator = msg['creator']

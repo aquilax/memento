@@ -108,7 +108,7 @@ def main():
     while next_contact != 0:
         c = DBContact(dat, next_contact)
         if args.mode == "contacts":
-          get_contact(c, contacts.append)
+            get_contact(c, contacts.append)
         if args.mode == "messages":
             messages += get_messages(c, owner_id, cb_on_message)
         next_contact = c.next

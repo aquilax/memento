@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/aquilax/memento/internal/export"
+	"github.com/aquilax/memento/internal/tools"
 	"github.com/urfave/cli/v3"
 )
 
@@ -12,6 +13,23 @@ func main() {
 	cmd := &cli.Command{
 		Name: "memento",
 		Commands: []*cli.Command{
+			{
+				Name:  "tools",
+				Usage: "data tools",
+				Commands: []*cli.Command{
+					{
+						Name:   "combine-contacts",
+						Usage:  "Combine multiple contacts files",
+						Action: tools.CmdCombineContacts,
+						Flags: []cli.Flag{
+							&cli.StringSliceFlag{
+								Name:    "file",
+								Aliases: []string{"f"},
+							},
+						},
+					},
+				},
+			},
 			{
 				Name:  "export",
 				Usage: "export database in specific format",

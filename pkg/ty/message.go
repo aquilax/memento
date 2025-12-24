@@ -46,12 +46,12 @@ type Attachment struct {
 }
 
 type Message struct {
-	Platform    Platform      `json:"platform,"`
-	Timestamp   time.Time     `json:"ts,"`
-	From        UserID        `json:"from,"`
-	To          MessageTarget `json:"to,"`
-	Text        string        `json:"text,"`
-	Raw         any           `json:"raw,"`
-	Attachments []Attachment  `json:"attachments"`
-	Meta        Meta          `json:"meta"`
+	Timestamp   time.Time     `json:"ts"`
+	Platform    Platform      `json:"platform"`
+	From        UserID        `json:"from"`
+	To          MessageTarget `json:"to"`
+	Text        string        `json:"text"`
+	Raw         any           `json:"raw,omitempty"`
+	Attachments []Attachment  `json:"attachments,omitempty"`
+	Meta        Meta          `json:"meta,omitempty"`
 }
