@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/aquilax/memento/internal/static"
 	"github.com/aquilax/memento/pkg/ty"
@@ -18,7 +19,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-const maxPage = 100
+const maxPage = 30
 
 type filterFunc func(m *ty.Message) bool
 
@@ -57,16 +58,22 @@ func (s *Server) Start() error {
 
 func (s *Server) contactsHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log := s.log.WithGroup("contactsHandler")
+		start := time.Now()
+		defer func() {
+			log.Info(r.RequestURI, slog.Any("duration", time.Now().Sub(start)))
+		}()
+
 		f, err := os.Open(s.ContactsFileName)
 		if err != nil {
-			s.log.Error(err.Error())
+			log.Error(err.Error())
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 		defer f.Close()
 
 		if _, err := io.Copy(w, f); err != nil {
-			s.log.Error(err.Error())
+			log.Error(err.Error())
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -75,6 +82,12 @@ func (s *Server) contactsHandler() http.Handler {
 
 func (s *Server) messagesHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log := s.log.WithGroup("messagesHandler")
+		start := time.Now()
+		defer func() {
+			log.Info(r.RequestURI, slog.Any("duration", time.Now().Sub(start)))
+		}()
+
 		filters := []filterFunc{}
 
 		if r.URL.Query().Has("contact_id") {
@@ -85,12 +98,21 @@ func (s *Server) messagesHandler() http.Handler {
 			})
 		}
 
+		cursor := r.URL.Query().Get("cursor")
+		if cursor != "" {
+			if tm, err := time.Parse(time.RFC3339, cursor); err == nil {
+				filters = append(filters, func(m *ty.Message) bool {
+					return m.Timestamp.After(tm)
+				})
+			}
+		}
+
 		limit := maxPage
 		var err error
 		if r.URL.Query().Has("limit") {
 			limit, err = strconv.Atoi(r.URL.Query().Get("limit"))
 			if err != nil {
-				s.log.Error(err.Error())
+				log.Error(err.Error())
 				http.Error(w, "Bad Request", http.StatusBadRequest)
 				return
 			}
@@ -101,16 +123,40 @@ func (s *Server) messagesHandler() http.Handler {
 
 		result, err := walkMessages(s.MessagesFileName, limit, filters)
 		if err != nil {
-			s.log.Error(err.Error())
+			log.Error(err.Error())
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
+		var nextCursor *string
+		nextPage := func() *string {
+			if len(result) < limit {
+				return nil // less than we requested, no cursor
+			}
+			if last, found := lo.Last(result); found {
+				nextUrl := *r.URL
+				query := nextUrl.Query()
+				nextCursor = lo.ToPtr(last.Timestamp.Format(time.RFC3339))
+				query.Set("cursor", *nextCursor)
+				nextUrl.RawQuery = query.Encode()
+
+				return lo.ToPtr(nextUrl.String())
+			}
+
+			return nil
+		}()
+
 		enc := json.NewEncoder(w)
 		enc.Encode(struct {
-			Messages []ty.Message `json:"messages"`
+			Messages   []ty.Message `json:"messages"`
+			NextPage   *string      `json:"next_page"`
+			NextCursor *string      `json:"next_cursor"`
+			Count      int          `json:"count"`
 		}{
-			Messages: result,
+			Messages:   result,
+			NextPage:   nextPage,
+			NextCursor: nextCursor,
+			Count:      len(result),
 		})
 	})
 }

@@ -31,17 +31,17 @@ async function fetchMessages(contactId, cursor = null) {
     // Record height before adding elements to maintain scroll position
     const oldHeight = list.scrollHeight;
 
-    messages.reverse().forEach((msg) => {
+    messages.forEach((msg) => {
       const msgEl = document.createElement("div");
       msgEl.className = `message ${
-        msg.from === contactId ? "sent" : "received"
+        msg.from === contactId ? "received" : "sent"
       }`;
       msgEl.innerHTML = `
                 ${msg.text}
                 <span class="timestamp">${msg.ts}</span>
             `;
       // Add to top of list
-      list.prepend(msgEl);
+      list.append(msgEl);
     });
 
     nextCursor = next_cursor;

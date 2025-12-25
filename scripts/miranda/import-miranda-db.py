@@ -60,7 +60,7 @@ def get_messages(c: DBContact, owner_id, on_message):
     user_id = get_id(c.settings)
     messages = []
     for e in c.events:
-        if e.dir() == '>':
+        if e.dir() == '<':
             m_from = str(user_id)
             m_to = {"type": "user", "user_id": str(owner_id)}
         else:

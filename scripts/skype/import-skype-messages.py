@@ -37,10 +37,10 @@
 #
 # Output must match the ty.Message struct
 #
-# Usage: python3 scripts/skype/import-messages.py contacts.json messages.json > skype-messages.json
+# Usage: python3 scripts/skype/import-messages.py messages.json > skype-messages.json
 
+import argparse
 import json
-import sys
 from datetime import timezone, datetime
 import re
 from collections import OrderedDict
@@ -55,39 +55,33 @@ def strip_html(text):
     # Simple HTML tag remover
     return re.sub(r'<[^>]+>', '', text)
 
+def get_user_id(s: str) -> str:
+    _before, sep, after = s.partition(":")
+    return after if sep else s
+
 def main():
-    if len(sys.argv) != 3:
-        print("Usage: python3 scripts/skype/import-messages.py contacts.json messages.json", file=sys.stderr)
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Import messages from skype export")
+    parser.add_argument("-f", "--file", required=True, help="messages.json file")
+    parser.add_argument("-u", "--user", required=True, help="UserID of the owner")
 
-    contacts_file = sys.argv[1]
-    messages_file = sys.argv[2]
+    args = parser.parse_args()
 
-    with open(contacts_file, 'r', encoding='utf-8') as f:
-        contacts = json.load(f)
-
-    user_map = {}
-    for user in contacts:
-        for pid in user['platform_ids']:
-            if pid['platform'] == 'skype':
-                user_map[pid['id']] = user
-                break  # assume one skype id per user
+    messages_file = args.file
+    owner_id = args.user
 
     with open(messages_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    user_id = data['userId']
-
     for conv in data['conversations']:
-        conv_id = conv['id']
+        conv_id = str(get_user_id(conv['id']))
         for msg in conv['MessageList']:
             ts_str = msg['originalarrivaltime']
             ts = datetime.fromisoformat(ts_str.replace('Z', '+00:00'))
-            from_id = str(msg['from'])
+            from_id = str(get_user_id(msg['from']))
 
             # Assume user conversation for now
             if from_id == conv_id:
-                to_user_id = user_id
+                to_user_id = owner_id
             else:
                 to_user_id = conv_id
 
