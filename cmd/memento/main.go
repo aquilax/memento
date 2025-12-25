@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/aquilax/memento/internal/export"
+	"github.com/aquilax/memento/internal/serve"
 	"github.com/aquilax/memento/internal/tools"
 	"github.com/urfave/cli/v3"
 )
@@ -13,6 +14,25 @@ func main() {
 	cmd := &cli.Command{
 		Name: "memento",
 		Commands: []*cli.Command{
+			{
+				Name:   "serve",
+				Usage:  "serve",
+				Action: serve.CmdServe,
+				Flags: []cli.Flag{
+					&cli.IntFlag{
+						Name:  "port",
+						Value: 8800,
+					},
+					&cli.StringFlag{
+						Name:  "contacts",
+						Value: "data/contacts.json",
+					},
+					&cli.StringFlag{
+						Name:  "messages",
+						Value: "data/messages.jsonl",
+					},
+				},
+			},
 			{
 				Name:  "tools",
 				Usage: "data tools",

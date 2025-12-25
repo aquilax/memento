@@ -86,11 +86,11 @@ def main():
                 # Get UIN of owner
                 uin = uin_dict.get(owner)
                 if direction == '>':
-                    m_from = uin;
-                    m_to = {"type": "user", "user_id": user_uin},
+                    m_from = str(uin)
+                    m_to = {"type": "user", "user_id": str(user_uin)},
                 else:
-                    m_from = user_uin;
-                    m_to = {"type": "user", "user_id": uin},
+                    m_from = str(user_uin)
+                    m_to = {"type": "user", "user_id": str(uin)},
                 if uin:
                     message = {
                         "platform": "icq",

@@ -7,6 +7,7 @@
 
 # Usage: import-contacts.py contacts.csv > skype-contacts.json
 
+import argparse
 import csv
 import json
 import os
@@ -17,34 +18,33 @@ import requests
 def download_avatar(avatar_url, user_id, avatar_dir):
     if not avatar_url:
         return None
+
+    # Sanitize filename: replace invalid characters with underscores
+    safe_filename = re.sub(r'[<>:"/\\|?*]', '_', user_id) + '.jpg'
+    file_path = os.path.join(avatar_dir, safe_filename)
+
+    if os.path.exists(file_path):
+        return safe_filename
+
     try:
         response = requests.get(avatar_url)
         response.raise_for_status()
-        # Sanitize filename: replace invalid characters with underscores
-        safe_filename = re.sub(r'[<>:"/\\|?*]', '_', user_id)
+
         # Get file extension from MIME type
-        content_type = response.headers.get('content-type', '').split(';')[0]
-        ext_map = {
-            'image/jpeg': '.jpg',
-            'image/png': '.png',
-            'image/gif': '.gif',
-            'image/webp': '.webp',
-        }
-        ext = ext_map.get(content_type, '')
-        filepath = os.path.join(avatar_dir, safe_filename + ext)
-        with open(filepath, 'wb') as f:
+        with open(file_path, 'wb') as f:
             f.write(response.content)
-        return safe_filename + ext
+        return safe_filename
     except Exception as e:
         print(f"Failed to download avatar for {user_id}: {e}", file=sys.stderr)
         return None
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python import-contacts.py contacts.csv", file=sys.stderr)
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Import contacts from skype export")
+    parser.add_argument("-f", "--file", required=True, help="conacts.csv file")
 
-    csv_file = sys.argv[1]
+    args = parser.parse_args()
+
+    csv_file = args.file
     avatar_dir = os.path.join(os.getcwd(), 'data', 'skype', 'avatar')
     os.makedirs(avatar_dir, exist_ok=True)
 
@@ -72,7 +72,7 @@ def main():
                     meta[key] = value.strip()
 
             platform_id = {
-                "id": skype_handle,
+                "id": str(skype_handle),
                 "platform": "skype",
                 "avatar": avatar_filename,
                 "meta": meta
