@@ -9,14 +9,15 @@ type GroupID string
 type Meta map[string]any
 
 const (
-	PlatformSkype  Platform = "skype"
-	PlatformICQ    Platform = "icq"
-	PlatformIRC    Platform = "irc"
-	PlatformSMS    Platform = "sms"
-	PlatformJabber Platform = "jabber"
-	PlatformMSN    Platform = "msn"
-	PlatformYahoo  Platform = "yahoo"
-	PlatformGoogle Platform = "google"
+	PlatformSkype    Platform = "skype"
+	PlatformICQ      Platform = "icq"
+	PlatformIRC      Platform = "irc"
+	PlatformSMS      Platform = "sms"
+	PlatformJabber   Platform = "jabber"
+	PlatformMSN      Platform = "msn"
+	PlatformYahoo    Platform = "yahoo"
+	PlatformGoogle   Platform = "google"
+	PlatformTelegram Platform = "telegram"
 
 	MessageTargetTypeGroup MessageTargetType = "group"
 	MessageTargetTypeUser  MessageTargetType = "user"

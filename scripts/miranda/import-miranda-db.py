@@ -23,6 +23,10 @@ def get_platform(p):
         return 'icq'
     elif p == 'IRC' or p == 'irc':
         return 'irc'
+    elif p == 'MSN' or p == 'msn':
+        return 'msn'
+    elif p == 'NET_SEND' or p == 'netsend':
+        return 'netsend'
     else:
         raise Exception(f"Unknown platform: {p}")
 
@@ -34,6 +38,10 @@ def get_id(settings):
     if platform == 'irc':
         return settings.setdefault("Nick", "UNKNOWN")
     if platform == 'jabber':
+        return settings.setdefault("Nick", "UNKNOWN")
+    if platform == 'msn':
+        return settings.setdefault("Nick", "UNKNOWN")
+    if platform == 'netsend':
         return settings.setdefault("Nick", "UNKNOWN")
     else:
         raise Exception(f"Unknown platform: {platform}")
