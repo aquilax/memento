@@ -29,6 +29,7 @@ func CmdCombineContacts(ctx context.Context, cmd *cli.Command) error {
 			return err
 		}
 	}
+	fmt.Printf("potato %v", acc)
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
 	return enc.Encode(lo.Values(acc))
@@ -41,8 +42,8 @@ func mergeContacts(target map[string]ty.Contact, addition []ty.Contact) error {
 			target[name] = addition[i]
 		} else {
 			target[name] = ty.Contact{
-				Name:        name,
-				PlatformIDs: append(target[name].PlatformIDs, addition[i].PlatformIDs...),
+				Name:      name,
+				Platforms: append(target[name].Platforms, addition[i].Platforms...),
 			}
 		}
 	}

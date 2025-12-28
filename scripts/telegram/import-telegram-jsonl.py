@@ -72,7 +72,7 @@ def _display_name(obj):
     return obj.get('username')
   if obj.get('phone'):
     return obj.get('phone')
-  return ''
+  return obj.get('id')
 
 
 def _parse_timestamp(record):
@@ -114,34 +114,29 @@ def collect_contacts(directory, encoding='utf-8'):
       if not (fname.endswith('.jsonl') or fname.endswith('.json')):
         continue
       path = os.path.join(root, fname)
-      try:
-        with open(path, 'r', encoding=encoding, errors='ignore') as fh:
-          for line in fh:
-            line = line.strip()
-            if not line:
+      with open(path, 'r', encoding=encoding, errors='ignore') as fh:
+        for line in fh:
+          line = line.strip()
+          if not line:
+            continue
+          rec = json.loads(line)
+          for side in ('from', 'to'):
+            obj = rec.get(side)
+            uid = _safe_id(obj)
+            if not uid:
               continue
-            try:
-              rec = json.loads(line)
-            except Exception:
-              continue
-
-            for side in ('from', 'to'):
-              obj = rec.get(side)
-              uid = _safe_id(obj)
-              if not uid:
-                continue
-              if uid not in contacts:
-                contacts[uid] = OrderedDict({
-                  'name': _display_name(obj),
-                  'platform_ids': [{
-                    'id': uid,
-                    'platform': 'telegram',
-                    'avatar': '',
-                    'meta': {}
-                  }]
-                })
-      except FileNotFoundError:
-        continue
+            uname = _display_name(obj)
+            if uid not in contacts:
+              contacts[uid] = OrderedDict({
+                'name': uname,
+                'platforms': [{
+                  'id': uid,
+                  'platform': 'telegram',
+                  'name': uname,
+                  'avatar': '',
+                  'meta': {}
+                }]
+              })
 
   return list(contacts.values())
 
@@ -235,4 +230,3 @@ def main():
 
 if __name__ == '__main__':
   main()
-

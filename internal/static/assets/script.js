@@ -69,7 +69,7 @@ async function fetchContacts() {
 
     contacts.forEach((contact) => {
       // Get the first platform ID as the primary reference
-      const primaryPlatform = contact.platform_ids[0] || {};
+      const primaryPlatform = contact.platforms[0] || {};
       const avatarUrl = primaryPlatform.avatar
         ? `/uploads/avatars/${primaryPlatform.avatar}`
         : "/assets/default-avatar.png";

@@ -2,37 +2,38 @@ package ty
 
 import "time"
 
-type Platform string
+type PlatformID string
 type MessageTargetType string
 type UserID string
 type GroupID string
 type Meta map[string]any
 
 const (
-	PlatformSkype    Platform = "skype"
-	PlatformICQ      Platform = "icq"
-	PlatformIRC      Platform = "irc"
-	PlatformSMS      Platform = "sms"
-	PlatformJabber   Platform = "jabber"
-	PlatformMSN      Platform = "msn"
-	PlatformYahoo    Platform = "yahoo"
-	PlatformGoogle   Platform = "google"
-	PlatformTelegram Platform = "telegram"
+	PlatformIDSkype    PlatformID = "skype"
+	PlatformIDICQ      PlatformID = "icq"
+	PlatformIDIRC      PlatformID = "irc"
+	PlatformIDSMS      PlatformID = "sms"
+	PlatformIDJabber   PlatformID = "jabber"
+	PlatformIDMSN      PlatformID = "msn"
+	PlatformIDYahoo    PlatformID = "yahoo"
+	PlatformIDGoogle   PlatformID = "google"
+	PlatformIDTelegram PlatformID = "telegram"
 
 	MessageTargetTypeGroup MessageTargetType = "group"
 	MessageTargetTypeUser  MessageTargetType = "user"
 )
 
-type PlatformID struct {
-	ID             string   `json:"id"`
-	Platform       Platform `json:"platform"`
-	AvatarFileName string   `json:"avatar"`
-	Meta           Meta     `json:"meta"`
+type Platform struct {
+	ID             string     `json:"id"`
+	Platform       PlatformID `json:"platform"`
+	Name           string     `json:"name"`
+	AvatarFileName string     `json:"avatar"`
+	Meta           Meta       `json:"meta"`
 }
 
 type Contact struct {
-	Name        string       `json:"name"`
-	PlatformIDs []PlatformID `json:"platform_ids"`
+	Name      string     `json:"name"`
+	Platforms []Platform `json:"platforms"`
 }
 
 type MessageTarget struct {
@@ -48,7 +49,7 @@ type Attachment struct {
 
 type Message struct {
 	Timestamp   time.Time     `json:"ts"`
-	Platform    Platform      `json:"platform"`
+	Platform    PlatformID    `json:"platform"`
 	From        UserID        `json:"from"`
 	To          MessageTarget `json:"to"`
 	Text        string        `json:"text"`

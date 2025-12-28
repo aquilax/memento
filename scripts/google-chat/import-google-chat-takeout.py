@@ -62,15 +62,16 @@ def collect_contacts(directory):
                 for member in data.get('members', []):
                     email = member['email']
                     if email not in contacts:
-                        platform_id = {
+                        platform = {
                             "id": str(email),
                             "platform": PLATFORM,
+                            "name": member['name'],
                             "avatar": "",
                             "meta": {}
                         }
                         contacts[email] = {
                             "name": member['name'],
-                            "platform_ids": [platform_id]
+                            "platforms": [platform]
                         }
     return list(contacts.values())
 

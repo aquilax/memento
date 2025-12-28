@@ -21,9 +21,10 @@ def collect_contacts(file, encoding='utf-8'):
       if uid not in contacts:
         contacts[uid] = OrderedDict({
           'name': name,
-          'platform_ids': [{
+          'platforms': [{
             'id': uid,
             'platform': 'skype',
+            'name': name,
             'avatar': '',
             'meta': {}
           }]

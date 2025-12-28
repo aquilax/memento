@@ -99,9 +99,10 @@ def collect_contacts(directory, encoding='utf-8'):
                             if contact_key not in contacts:
                                 contacts[contact_key] = OrderedDict({
                                     "name": contact_name,
-                                    "platform_ids": [{
+                                    "platforms": [{
                                         "id": str(contact_id),
                                         "platform": platform,
+                                        "name": contact_name,
                                         "avatar": "",
                                         "meta": {}
                                     }]

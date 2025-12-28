@@ -47,9 +47,10 @@ def main():
             platform = "icq" if uin else "unknown"
             user = {
                 "name": name,
-                "platform_ids": [{
+                "platforms": [{
                     "id": platform_id,
                     "platform": platform,
+                    "name": name,
                     "avatar": "",
                     "meta": settings,
                 }]

@@ -55,9 +55,10 @@ def get_contact(c: DBContact, on_contact):
         settings[k] = v
     on_contact({
         "name": name,
-        "platform_ids": [{
+        "platforms": [{
             "id": str(get_id(settings)),
             "platform": get_platform(settings["p"]),
+            "name": name,
             "avatar": "",
             "meta": settings
         }]

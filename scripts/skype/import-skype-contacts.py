@@ -71,16 +71,17 @@ def main():
                 if key not in exclude_fields and value.strip():
                     meta[key] = value.strip()
 
-            platform_id = {
+            platform = {
                 "id": str(skype_handle),
                 "platform": "skype",
+                "name": display_name,
                 "avatar": avatar_filename,
                 "meta": meta
             }
 
             user = {
                 "name": display_name,
-                "platform_ids": [platform_id]
+                "platforms": [platform]
             }
 
             users.append(user)
@@ -89,4 +90,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
