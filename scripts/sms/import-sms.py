@@ -39,6 +39,7 @@ def parse_date_time(dt):
     return None
 
   formats = [
+    "%y/%m/%d %H:%M:%S",
     "%d.%m.%Y г. %H:%M:%S",  # 29.12.2003 г. 21:40:05
     "%d.%m.%Y г. %H:%M",     # 29.12.2003 г. 21:40
     "%d.%m.%y 'г.' %H:%M",
@@ -72,7 +73,7 @@ def collect_messages_xml(file_name, user_id, on_message, encoding):
       'ts': format_utc_seconds(ts),
       'platform': 'sms',
       'from': str(mfrom),
-      'to': user_id,
+      'to': {"type": "user", "user_id": user_id},
       'text': msg['TEXT'],
     })
     on_message(message)
@@ -88,7 +89,7 @@ def collect_messages_csv(file_name, user_id, on_message, encoding):
         'ts': format_utc_seconds(ts),
         'platform': 'sms',
         'from': str(number),
-        'to': user_id,
+        'to': {"type": "user", "user_id": user_id},
         'text': text,
       })
       on_message(message)
@@ -146,7 +147,7 @@ def collect_messages_txt(file_name, user_id, on_message, encoding):
       'ts': format_utc_seconds(record['date']),
       'platform': 'sms',
       'from': str(record['numbers']),
-      'to': user_id,
+      'to': {"type": "user", "user_id": user_id},
       'text': record['message'],
     })
     on_message(message)
@@ -182,3 +183,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

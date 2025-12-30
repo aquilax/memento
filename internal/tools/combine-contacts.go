@@ -29,7 +29,6 @@ func CmdCombineContacts(ctx context.Context, cmd *cli.Command) error {
 			return err
 		}
 	}
-	fmt.Printf("potato %v", acc)
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
 	return enc.Encode(lo.Values(acc))
